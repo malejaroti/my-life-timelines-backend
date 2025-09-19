@@ -4,9 +4,23 @@ import { JwtPayload } from '../types/auth';
 
 const router = Router()
 
+//GET / - Get all users (username profilePicture and email )
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.payload) return res.status(401).json({ errorMessage: "no payload" });
+  const { _id: userId } = req.payload as JwtPayload;  
+ 
+  try {
+    const response = await User.find().select("name username profilePicture email" );
+    console.log(response)
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 //GET / - Get logged user details (username profilePicture and email )
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/logged-user", async (req: Request, res: Response, next: NextFunction) => {
   if (!req.payload) return res.status(401).json({ errorMessage: "no payload" });
   const { _id: userId } = req.payload as JwtPayload;  
  
@@ -19,6 +33,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 });
+
 
 //PATCH /api/user/friends - Add a new friend
 router.patch("/friends", async (req: Request, res: Response, next: NextFunction) => {

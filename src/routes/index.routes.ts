@@ -16,7 +16,7 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 router.use("/auth", authRouter)
 router.use("/timelines", validateToken, timelineRouter);
 router.use("/upload", validateToken, uploadRouter);
-router.use("/user", validateToken, userRouter);
+router.use("/users", validateToken, userRouter);
 
 // module.exports = indexRouter;
 export default router

@@ -10,7 +10,7 @@ import User from "../models/User.model"
 router.post("/signup", async (req: Request, res: Response, next: NextFunction) => {
   console.log(req.body);
 
-  const { username, email, password } = req.body;
+  const { name, username, email, password } = req.body;
 
   //validation
   // all the info is received or is not empty (email, password, username)
@@ -43,17 +43,18 @@ router.post("/signup", async (req: Request, res: Response, next: NextFunction) =
     // hash the password 
     const hashPassword = await bcrypt.hash(password, 12); 
 
-    await User.create({
+    const response = await User.create({
+      name,
       username,
       email,
       password: hashPassword,
+      profilePicture: ""
     });
 
-    res.sendStatus(201);
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }
-  res.send("testing route, all good");
 });
 
 // POST "/api/auth/login" => verify the credentials of the user and send a token

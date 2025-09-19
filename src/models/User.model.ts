@@ -33,7 +33,7 @@ const userSchema = new Schema<IUser>(
     },
     profilePicture: {
       type: String,
-      required: true
+      required: false
     }
   },
   {
