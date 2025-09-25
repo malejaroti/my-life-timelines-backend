@@ -11,7 +11,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
  
   try {
     const response = await User.find().select("name username profilePicture email" );
-    console.log(response)
+    // console.log(response)
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -26,7 +26,7 @@ router.get("/logged-user", async (req: Request, res: Response, next: NextFunctio
  
   try {
     const response = await User.findById( userId ).select("name username profilePicture email" );
-    console.log(response)
+    // console.log(response)
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
