@@ -10,10 +10,16 @@ export default function config(app : Application) {
   app.set("trust proxy", 1);
   
   // ℹ️ Configures CORS to allow requests only from the specified origin
+  const allowedOrigins =
+  (process.env.CORS_ORIGINS ?? "")
+    .split(",")
+    .map(s => s.trim())
+    .filter((v): v is string => !!v);
+
   app.use(
     cors({
-      // origin: [process.env.ORIGIN]
-      origin: process.env.ORIGIN ? [process.env.ORIGIN] : []
+      // origin: [process.env.ORIGIN, " http://localhost:5174"]
+      origin: allowedOrigins
     })
   );
   
