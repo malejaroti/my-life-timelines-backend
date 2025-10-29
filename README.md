@@ -1,4 +1,4 @@
-This is the server-side application for a web platform that allows users to create, share, and collaborate on interactive timelines. Built as part of the Ironhack Web Development Bootcamp (Project for last module (3)), this RESTful API provides comprehensive timeline management capabilities with user authentication, and timeline and timeline items creation with media upload features.
+This is the **server-side application for a web platform that allows users to create, share, and collaborate on interactive timelines**. Built as part of the Ironhack Web Development Bootcamp (Project for last module (3)), this RESTful API provides comprehensive timeline management capabilities with user authentication, and timeline and timeline items creation with media upload features.
 
 - **Frontend repo**: https://github.com/malejaroti/my-life-timelines-frontend
 - **Deployed app**: https://my-life-timelines.netlify.app/
