@@ -26,9 +26,20 @@ my-life-timelines-backend/       # Backend Node.js application
 │   └── server.ts                
 ```
 
-### 📊 API Endpoints
+## 📊 API Endpoints
 - **Authentication routes** - `/api/auth`
 - **Timeline CRUD operations** - `/api/timelines`
 - **Timeline item management** - `/api/timelines/:id/items`
 - **User management** - `/api/users`
 - **File upload handling** - `/api/upload`
+
+## Set up environment variables
+Take `.env.example` as reference and create the `.env` file with the following variables:
+   ```env
+   PORT=5005
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   CLOUDINARY_NAME=your_cloudinary_name
+   CLOUDINARY_KEY=your_cloudinary_key
+   CLOUDINARY_SECRET=your_cloudinary_secret
+   ```
