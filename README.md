@@ -8,6 +8,21 @@ This is the server-side application for a web platform that allows users to crea
 - **File Upload**: Multer with Cloudinary storage
 - **Development** - tsx for hot reloading, ESLint, Prettier
 
+## 📦 Project Structure
+
+```
+my-life-timelines-backend/       # Backend Node.js application
+├── src/
+│   ├── config/                  # Configuration files
+│   ├── db/                      # Database connection
+│   ├── middlewares/             # Express middlewares
+│   ├── models/                  # Mongoose models
+│   ├── routes/                  # API routes
+│   ├── types/                   # TypeScript type definitions
+│   └── utils/                   # Utility functions
+│   └── server.ts                
+```
+
 ### 📊 API Endpoints
 - **Authentication routes** - `/api/auth`
 - **Timeline CRUD operations** - `/api/timelines`
