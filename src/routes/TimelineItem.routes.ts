@@ -5,6 +5,7 @@ import TimelineItem from '../models/TimelineItem.model';
 import { JwtPayload } from '../types/auth';
 import getUserIdFromPayload from '../utils/getUserIdFromPayload';
 
+// ‼️ All routes in this router are prefixed with /api/timelines/:timelineId
 const router = Router({ mergeParams: true }); 
 
 //POST /api/timelines/:timelineId/items - Create a new timeline item
@@ -47,7 +48,7 @@ router.post("/items", async (req: Request, res: Response, next: NextFunction) =>
   }
 });
 
-//GET /api/timelines/:timelineId/items - Get all of the itms of one timeline item
+//GET /api/timelines/:timelineId/items - Get all of the items of one timeline item
 router.get("/items", async (req: Request, res: Response, next: NextFunction) => {
   if (!req.payload) return res.status(401).json({ errorMessage: "no payload" });
   const { _id: loggedUserId } = req.payload as JwtPayload;
