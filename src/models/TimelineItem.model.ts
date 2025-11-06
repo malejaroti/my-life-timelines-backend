@@ -68,7 +68,8 @@ const timelineItemSchema = new Schema<ITimelineItem>(
         default: "neutral"
     },
     tags: {
-        type:[String],
+        type: [Schema.Types.ObjectId],
+        ref: "Tag",
         required: false
     },
     comments: {
