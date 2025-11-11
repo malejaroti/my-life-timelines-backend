@@ -4,6 +4,7 @@ import Timeline from "../models/Timeline.model"
 import TimelineItem from '../models/TimelineItem.model';
 import { JwtPayload } from '../types/auth';
 import getUserIdFromPayload from '../utils/getUserIdFromPayload';
+import Tag, {type ITag} from '../models/Tag.model';
 
 // ‼️ All routes in this router are prefixed with /api/timelines/:timelineId
 const router = Router({ mergeParams: true }); 
@@ -30,22 +31,45 @@ router.post("/items", async (req: Request, res: Response, next: NextFunction) =>
   const {title, kind, description, startDate, endDate, images, impact, tags} = req.body;
 
   if(!title){
-    res.status(400).json({errorMessage: "Timeline item name is required"})
+    const errorMessage = 'Timeline item name is required';
+    console.log(`Error: ${errorMessage}`);
+    res.status(400).json({errorMessage: errorMessage});
     return
   }
 
   // If no endDate is provided, use today's date (present)
   const finalEndDate = endDate ?? new Date();
-
+  
+  const tagsWithId: ITag[] = tags.filter((tag: ITag) => tag._id)
+  console.log("tags with id only", tagsWithId);
+  
   try {
-    const response = await TimelineItem.create({
-        timeline, creator, title, kind, description, startDate, endDate, images, impact, tags, isApproved
-    });
-    res.status(201).json(response);
+    const newTagsIds: ITag[] = await Promise.all(
+      tags
+      .filter((tag: ITag) => !tag._id)
+      .map((tag: ITag) => tag.name && 
+        Tag.create({name: tag.name.trim().charAt(0).toUpperCase() + tag.name.trim().slice(1).toLowerCase()})
+      )
+    );
+    console.log("new tags created", newTagsIds);
+    const finalTags = [...tagsWithId.map((tag) => tag._id), ...newTagsIds.map((tag) => tag._id)];
+    console.log("Array of final tags ids", finalTags);
+    try {
+      const response = await TimelineItem.create({
+          timeline, creator, title, kind, description, startDate, endDate, images, impact, tags:finalTags, isApproved
+      });
+      res.status(201).json(response);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   } catch (error) {
-    console.log(error);
+    console.log("error creating new tags", error);
+    res.status(500).json({ errorMessage: "Error creating new tags" });
     next(error);
+    return;
   }
+
 });
 
 //GET /api/timelines/:timelineId/items - Get all of the items of one timeline item
@@ -57,7 +81,7 @@ router.get("/items", async (req: Request, res: Response, next: NextFunction) => 
   const { timelineId, itemId } = req.params;
   
   try {
-    const foundTimeline = await Timeline.findById(timelineId);
+    const foundTimeline = await Timeline.findById(timelineId)
     if (!foundTimeline) return res.status(404).json({ message: "Timeline not found" });
    
     // Check if timeline is public OR user is owner/collaborator/creator
@@ -67,7 +91,8 @@ router.get("/items", async (req: Request, res: Response, next: NextFunction) => 
     
     if (isTimelineOwner || isCollaborator) {
       const response = await TimelineItem.find({timeline : timelineId})
-        .sort({ startDate: 1, endDate: 1, _id: 1 }); // Return items in ascending chronological order. _id breaks ties deterministically
+        .sort({ startDate: 1, endDate: 1, _id: 1 }) // Return items in ascending chronological order. _id breaks ties deterministically
+        .populate("tags", "_id name"); // Populate tags but only return name and id field
       res.status(200).json(response);
     } else {
       return res.status(403).json({ errorMessage: "Access denied.User is neither timeline owner, nor creator of the item, nor timeline collaborator" });
