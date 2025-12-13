@@ -5,6 +5,7 @@ import TimelineItem from '../models/TimelineItem.model';
 import { JwtPayload } from '../types/auth';
 import getUserIdFromPayload from '../utils/getUserIdFromPayload';
 import Tag, {type ITag} from '../models/Tag.model';
+import { time } from 'console';
 
 // ‼️ All routes in this router are prefixed with /api/timelines/:timelineId
 const router = Router({ mergeParams: true }); 
@@ -39,38 +40,43 @@ router.post("/items", async (req: Request, res: Response, next: NextFunction) =>
 
   // If no endDate is provided, use today's date (present)
   const finalEndDate = endDate ?? new Date();
-  
-  const tagsWithId: ITag[] = tags.filter((tag: ITag) => tag._id)
-  console.log("tags with id only", tagsWithId);
-  
-  try {
-    const newTagsIds: ITag[] = await Promise.all(
-      tags
-      .filter((tag: ITag) => !tag._id)
-      .map((tag: ITag) => tag.name && 
-        Tag.create({name: tag.name.trim().charAt(0).toUpperCase() + tag.name.trim().slice(1).toLowerCase()})
-      )
-    );
-    console.log("new tags created", newTagsIds);
-    const finalTags = [...tagsWithId.map((tag) => tag._id), ...newTagsIds.map((tag) => tag._id)];
-    console.log("Array of final tags ids", finalTags);
     try {
+      const tagIds = await updateItemTags(tags, res, next);
       const response = await TimelineItem.create({
-          timeline, creator, title, kind, description, startDate, endDate, images, impact, tags:finalTags, isApproved
+          timeline, creator, title, kind, description, startDate, endDate, images, impact, tags:tagIds, isApproved
       });
       res.status(201).json(response);
     } catch (error) {
       console.log(error);
       next(error);
     }
-  } catch (error) {
-    console.log("error creating new tags", error);
-    res.status(500).json({ errorMessage: "Error creating new tags" });
-    next(error);
-    return;
-  }
 
 });
+
+const updateItemTags = async (tags: ITag[], res: Response, next: NextFunction)=>{
+  const existingTags: ITag[] = tags.filter((tag: ITag) => tag._id)
+  console.log("Existing tags (already have id): ", existingTags);
+  try {
+    const newTagsToCreate = tags
+      .filter((tag: ITag) => !tag._id && tag.name); // Filter out tags without names
+
+    const newTags: ITag[] = await Promise.all(
+      newTagsToCreate
+      .map((tag: ITag) => 
+        Tag.create({name: tag.name.trim().charAt(0).toUpperCase() + tag.name.trim().slice(1).toLowerCase()})
+      )
+    );
+    console.log("new tags created", newTags);
+    const finalTags = [...existingTags.map((tag) => tag._id), ...newTags.map((tag) => tag._id)];
+    console.log("Final array all tags", finalTags);
+    return finalTags
+  } catch (error) {
+      console.log("error creating new tags", error);
+      res.status(500).json({ errorMessage: "Error creating new tags" });
+      next(error);
+      return;
+  }
+}
 
 //GET /api/timelines/:timelineId/items - Get all of the items of one timeline item
 router.get("/items", async (req: Request, res: Response, next: NextFunction) => {
@@ -83,7 +89,7 @@ router.get("/items", async (req: Request, res: Response, next: NextFunction) => 
   try {
     const foundTimeline = await Timeline.findById(timelineId)
     if (!foundTimeline) return res.status(404).json({ message: "Timeline not found" });
-   
+
     // Check if timeline is public OR user is owner/collaborator/creator
     const isPublic = false; //foundTimeline.isPublic;
     const isTimelineOwner = foundTimeline.owner.toString() === loggedUserId;
@@ -143,6 +149,7 @@ router.put("/items/:itemId", async (req: Request, res: Response, next: NextFunct
 
   const { _id: loggedUserId } = req.payload as JwtPayload;
   const { timelineId, itemId } = req.params;
+  console.log(`timelineId from req.params: ${timelineId}`);
   
   // if (!mongoose.isValidObjectId(timelineId)) {
   //   return res.status(400).json({ message: "Invalid ObjectId format for TimelineId" });
@@ -162,14 +169,15 @@ router.put("/items/:itemId", async (req: Request, res: Response, next: NextFunct
       (collab) => collab.toString() === loggedUserId.toString());
       
       if (isTimelineOwner || isItemCreator || isCollaborator) {
-        const { title, description, startDate, endDate, images, impact, tags } = req.body;
+        const { timeline, title, description, startDate, endDate, images, impact, tags } = req.body;
         const updates: any = {};
+        if (timeline !== undefined) updates.timeline = timeline;
         if (title !== undefined) updates.title = title;
         if (description !== undefined) updates.description = description;
         if (startDate !== undefined) updates.startDate = startDate;
         if (endDate !== undefined) updates.endDate = endDate;
         if (images !== undefined) updates.images = images;
-        if (tags !== undefined) updates.tags = tags;
+        if (tags !== undefined) updates.tags = await updateItemTags(tags,res,next);
     
         const response = await TimelineItem.findByIdAndUpdate(
           itemId,
