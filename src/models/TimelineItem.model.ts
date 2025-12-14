@@ -38,7 +38,6 @@ const timelineItemSchema = new Schema<ITimelineItem>(
     title: {
       type: String,
       required: [true, "Title is required"],
-      // unique: true,
     },
     description: {
       type: String,
