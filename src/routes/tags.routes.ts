@@ -1,3 +1,4 @@
+
 import { Request, Response, NextFunction, Router } from 'express';
 import Tag from '../models/Tag.model';
 const router = Router();
@@ -5,9 +6,18 @@ const router = Router();
 
 //POST /api/tags - Create a new tag
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    const { name } = req.body;
-    try{
-        const response = await Tag.create({name});
+  const { name } = req.body;
+  if (  
+        typeof name !== 'string' ||  
+        !name.trim() ||  
+        name.trim().length < 1 ||  
+        name.trim().length > 50  
+    ) {  
+        return res.status(400).json({ error: "Invalid 'name' field: must be a non-empty string between 1 and 50 characters." });  
+    }  
+
+    try{  
+        const response = await Tag.create({name: name.trim()});  
         res.status(201).json(response)
     } catch (error) {
         next(error);
@@ -26,6 +36,14 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 
 //PATCH /api/tags - Update a tag
 router.patch("/", async (req:Request, res:Response, next: NextFunction) => {
+  const { oldName, newName } = req.body;  
+  if (  
+    typeof oldName !== 'string' || oldName.trim() === '' ||  
+    typeof newName !== 'string' || newName.trim() === ''  
+  ) {  
+    return res.status(400).json({ error: "Both oldName and newName must be provided as non-empty strings." });  
+  } 
+  
   try {
     const response = await Tag.findOneAndUpdate({ name: req.body.oldName }, { name: req.body.newName }, { new: true });
     res.status(200).json(response);
@@ -35,12 +53,12 @@ router.patch("/", async (req:Request, res:Response, next: NextFunction) => {
   }
 })
 
-//DELETE /api/tags - Delete a tag
-router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
+//DELETE /api/tags/:name - Delete a tag
+router.delete("/:name", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name } = req.body;
+    const { name } = req.params;
     const tags = await Tag.findOneAndDelete({ name });
-    res.status(204).json(tags);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
