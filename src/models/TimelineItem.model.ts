@@ -38,7 +38,6 @@ const timelineItemSchema = new Schema<ITimelineItem>(
     title: {
       type: String,
       required: [true, "Title is required"],
-      unique: true,
     },
     description: {
       type: String,
@@ -68,7 +67,8 @@ const timelineItemSchema = new Schema<ITimelineItem>(
         default: "neutral"
     },
     tags: {
-        type:[String],
+        type: [Schema.Types.ObjectId],
+        ref: "Tag",
         required: false
     },
     comments: {
