@@ -5,8 +5,6 @@ import timelineRouter from "../routes/Timeline.routes"
 import uploadRouter from "../routes/upload.routes"
 import userRouter from "../routes/User.routes"
 import itemsRouter from "../routes/Items.routes"
-import tagsRouter from './tags.routes';
-// const uploadRoutes = require("./upload.routes");
 
 const router = Router();
 
@@ -18,9 +16,7 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 router.use("/auth", authRouter)
 router.use("/timelines", validateToken, timelineRouter);
 router.use("/items", validateToken, itemsRouter);
-router.use("/tags", validateToken, tagsRouter);
 router.use("/upload", validateToken, uploadRouter);
 router.use("/users", validateToken, userRouter);
 
-// module.exports = indexRouter;
 export default router
