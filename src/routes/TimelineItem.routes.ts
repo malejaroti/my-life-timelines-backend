@@ -81,7 +81,7 @@ router.get("/items", async (req: Request, res: Response, next: NextFunction) => 
   const { timelineId, itemId } = req.params;
   
   try {
-    const foundTimeline = await Timeline.findById(timelineId)
+    const foundTimeline = await Timeline.findById(timelineId);
     if (!foundTimeline) return res.status(404).json({ message: "Timeline not found" });
 
     // Check if timeline is public OR user is owner/collaborator/creator
