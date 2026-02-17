@@ -42,16 +42,18 @@ router.patch("/", async (req:Request, res:Response, next: NextFunction) => {
     typeof newName !== 'string' || newName.trim() === ''  
   ) {  
     return res.status(400).json({ error: "Both oldName and newName must be provided as non-empty strings." });  
-  } 
-  
+//PATCH /api/tags/:name - Update a tag by name
+router.patch("/:name", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const response = await Tag.findOneAndUpdate({ name: req.body.oldName }, { name: req.body.newName }, { new: true });
+    const { name: newName } = req.body;
+    const { name: oldName } = req.params;
+    const response = await Tag.findOneAndUpdate({ name: oldName }, { name: newName }, { new: true });
     res.status(200).json(response);
   } catch (error) {
-    console.log("error updating tag name")
+    console.log("error updating tag name");
     next(error);
   }
-})
+});
 
 //DELETE /api/tags/:name - Delete a tag
 router.delete("/:name", async (req: Request, res: Response, next: NextFunction) => {
