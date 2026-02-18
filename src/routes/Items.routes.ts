@@ -19,7 +19,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 
     const items = await TimelineItem.find({ creator: loggedUserId })
     // Return items in descending chronological order (most recent first), if startDate is the same, sort by endDate. If both are the same, the order is determined by _id which is unique and monotonically increasing. This ensures a deterministic order.
-        .sort({ startDate: -1, endDate: -1 })
+        .sort({ startDate: -1, endDate: -1, _id: -1 })
         .limit(limit)
         .populate("timeline");
     res.status(200).json(items);
