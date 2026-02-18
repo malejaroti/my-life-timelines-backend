@@ -9,18 +9,19 @@ export default function config(app : Application) {
   // ℹ️ Enables Express to trust reverse proxies (e.g., when deployed behind services like Heroku or Vercel)
   app.set("trust proxy", 1);
   
-// ℹ️ Configures CORS to allow requests only from the specified origins
-  const fallbackOrigin =
-  process.env.NODE_ENV === "production"
-    ? "https://my-life-timelines.netlify.app/"
-    : "http://localhost:5174";
+  // ℹ️ Configures CORS to allow requests only from the specified origins
+  const isProd = process.env.NODE_ENV === "production";
 
   const allowedOrigins =
-  (process.env.CORS_ORIGINS ?? fallbackOrigin)
+  (process.env.CORS_ORIGINS ?? "")
     .split(",")
     .map(s => s.trim())
     .filter((v): v is string => !!v);
-
+  
+  console.log("Allowed CORS origins:", allowedOrigins);
+  if (isProd && allowedOrigins.length === 0) {
+    throw new Error("CORS_ORIGINS must be defined in production");
+  }
   app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : "*" }));  
   
 // ℹ️ Logs requests in the development environment
