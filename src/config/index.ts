@@ -20,7 +20,7 @@ export default function config(app : Application) {
   
   console.log("Allowed CORS origins:", allowedOrigins);
   if (isProd && allowedOrigins.length === 0) {
-  throw new Error("CORS_ORIGINS must be defined in production");
+    throw new Error("CORS_ORIGINS must be defined in production");
   }
   app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : "*" }));  
   
